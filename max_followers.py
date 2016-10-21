@@ -1,48 +1,53 @@
-import twitter, twitter_config, sys, ast 
-from os import path 
-users = ['spacedicks1488' , 'TheGeoff6Blues']
-states_file = '/home/pi/git/twitter_dm_echo/states.dict' 
+import twitter, twitter_config, sys, ast, random
+from datetime import datetime
+from os import path
 
-#if path.isfile(states_file):
-#    states = dict(open(states_file, 'r').read()) 
-#else:
-#    states = dict()
-#    for user in users:
-#        states[user] = {'since_id': 0}
-#        states['user']['since_id'] = 0
-#    states['blacklist_patterns'] = [] 
-#    with open(states_file, 'w') as file:
-#        file.write(str(states))
+ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
 
-def check_tweets(tw, states, user):
+users = ['FucktardIdiot']
+states_file = '/home/pi/git/twitter_max_followers/states.dict'
+
+def check_follows(tw, states, user):
     try:
-        dms = tw.GetDirectMessages(since_id=states[user]['since_id'])
-    
+        followers = tw.GetFollowersList(since_id=states[user]['since_id'])
+
     except Exception as e:
         print sys.exc_info()
         return
 
-    if dms:
-        states[user]['since_id'] = dms[0].id
-        for dm in dms:
+    if len(followers) > user['max_follower_count']:
+        blocks = followers[user['max_follower_count'] - len(followers):]
+        user['blocks'][datetime.now()] = blocks
+        for block in blocks:
             #if dm.entities.media.media_url:
             #    print dm.entities.media.media_url
             try:
-                tw.PostUpdate(dm.AsDict()['text']) 
+                status = random.choice(user['status_formats'])
+                status = status.format(ordinal(len(user['blocks'])),
+                                       ordinal(user['max_follower_count']),
+                                       block.screen_name)
+                print status
+                #tw.PostUpdate(dm.AsDict()['text'])
             except Exception as e:
                 print sys.exc_info()
-#    return states
-    with open(states_file, 'w') as file:
-        file.write(str(states))
+
+    return states
 
 
 if __name__ == '__main__':
+    # Load the last state of things
     if path.isfile(states_file):
-        states = ast.literal_eval(open(states_file, 'r').read())
+        states = dict(open(states_file, 'r').read())
     else:
-        states = dict.fromkeys(users)
+        # Or make it with defaults
         for user in users:
-            states[user] = {'since_id': 0, 'blacklist_users': [], 'blacklist_patterns': []}
+            states = dict()
+            states[user] = {'max_followers': 1999,
+                            'blocks': {datetime.now(): []},
+                            'status_formats': ['Welcome to my {0} {1} follower {2}, who i shall now block.']}
+        with open(states_file, 'w') as file:
+            file.write(str(states))
+
 
     for user in users:
         cred = twitter_config.accounts[user]
@@ -55,4 +60,9 @@ if __name__ == '__main__':
             print e
             print 'Error on init'
             exit()
-        user_state = check_tweets(tw, states, user)
+
+        user_state = check_follows(tw, states, user)
+        states[user] = user_state
+        
+        with open(states_file, 'w') as file:
+            file.write(str(states))
