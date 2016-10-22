@@ -35,6 +35,7 @@ def check_follows(tw, state, user):
                                    block.screen_name)
             try:
                 tw.CreateBlock(screen_name=block.screen_name)
+                tw.DestroyBlock(screen_name=block.screen_name)
                 tw.PostUpdate(status=status)
                 'Blocked {0}!!'.format(block.screen_name)
             except Exception as e:
