@@ -20,30 +20,34 @@ def check_follows(tw, state, user):
         print sys.exc_info()
         return state
     
-    if len(followers) <= state['max_followers']:
-        print 'Ahh {1}... just right. You have {0} grateful followers.'.format(len(followers), user)
-    else:
-        print 'Oh no {1}!! You have {0} followers! Thats too many!!! Lets block some'.format(len(followers), user)
-        
-        blocks = followers[:len(followers) - state['max_followers']]
-        blocklist = [b.screen_name for b in blocks]
+    current_followers = [(f.id, f.screen_name) for f in followers]
 
+    if len(current_followers) <= state['max_followers']:
+        state['followers'] = current_followers
+        print 'Ahh {1}... just right. You have {0} grateful followers.'.format(len(current_followers), user)
+    else:
+        print 'Oh no {1}!! You have {0} followers! Thats too many!!! Lets block some'.format(len(current_followers), user)
+
+        new_follows = [nf for nf in current_followers if nf[0] not in [f[0] for f in state['followers']]]
+        blocks = new_follows[:len(current_followers) - state['max_followers']]
+        
         for n, block in enumerate(blocks):
             status = random.choice(state['status_formats'])
-            status = status.format(ordinal(len(state['blocks'])+n),
+            status = status.format(ordinal(len(state['blocks'])+n+1),
                                    ordinal(state['max_followers']),
-                                   block.screen_name)
+                                   block[1])
             try:
-                tw.CreateBlock(screen_name=block.screen_name)
-                tw.DestroyBlock(screen_name=block.screen_name)
+                tw.CreateBlock(user_id=block[0])
+                tw.DestroyBlock(user_id=block[0])
                 tw.PostUpdate(status=status)
-                'Blocked {0}!!'.format(block.screen_name)
+                'Blocked {0}!!'.format(block[1])
             except Exception as e:
                 print sys.exc_info()
                 return state
             
         with open(log_file, 'a') as lf:
-            lf.write('Blocked at {0}:\n      {1}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),','.join(blocklist)))
+            lf.write('Blocked at {0}:\n      {1}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),','.join([b[1] for b in blocks])))
+            
 
     return state
 
@@ -56,8 +60,7 @@ if __name__ == '__main__':
         # Or make it with defaults
         states = dict()
     for user in [u for u in users if u not in states.keys()]:
-        states = dict()
-        states[user] = dict(
+        states[user] = dict(followers=[],
                             max_followers=2000,
                             blocks=[],
                             status_formats=['Welcome to my {0} {1} follower @{2}, who i shall now block.'])
