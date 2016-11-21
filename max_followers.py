@@ -33,13 +33,15 @@ def check_follows(tw, state, user):
         
         for n, block in enumerate(blocks):
             status = random.choice(state['status_formats'])
-            status = status.format(ordinal(len(state['blocks'])+n+1),
-                                   ordinal(state['max_followers']),
+            status = status.format(ordinal(len(state['blocks'])+n),
+                                   ordinal(state['max_followers']+1),
                                    block[1])
             try:
                 tw.CreateBlock(user_id=block[0])
                 tw.DestroyBlock(user_id=block[0])
                 tw.PostUpdate(status=status)
+                state['blocks'].append(block[0])
+                #print status
                 'Blocked {0}!!'.format(block[1])
             except Exception as e:
                 print sys.exc_info()
@@ -48,7 +50,7 @@ def check_follows(tw, state, user):
         with open(log_file, 'a') as lf:
             lf.write('Blocked at {0}:\n      {1}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),','.join([b[1] for b in blocks])))
             
-
+    #state['blocks'] = [b for b in set(state['blocks'])]
     return state
 
 
