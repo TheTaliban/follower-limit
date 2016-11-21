@@ -33,7 +33,7 @@ def check_follows(tw, state, user):
         
         for n, block in enumerate(blocks):
             status = random.choice(state['status_formats'])
-            status = status.format(ordinal(len(state['blocks'])+n),
+            status = status.format(ordinal(len(state['blocks'])+1),
                                    ordinal(state['max_followers']+1),
                                    block[1])
             try:
