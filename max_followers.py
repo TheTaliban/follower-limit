@@ -5,12 +5,15 @@ from os import path
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
 
 users = [
-        'FucktardIdiot',
+        'THE_TALlBAN'
+        #'FucktardIdiot'
         #'TheGeoff6Blues'
         ]
 
-states_file = '/home/pi/git/twitter_max_followers/states.dict'
-log_file = '/home/pi/git/twitter_max_followers/log.txt'
+#states_file = '/home/pi/git/twitter_max_followers/states.dict'
+states_file = 'states.dict'
+#log_file = '/home/pi/git/twitter_max_followers/log.txt'
+log_file = 'log.txt'
 
 def check_follows(tw, state, user):
     try:
@@ -63,9 +66,11 @@ if __name__ == '__main__':
         states = dict()
     for user in [u for u in users if u not in states.keys()]:
         states[user] = dict(followers=[],
-                            max_followers=2000,
+                            max_followers=68,
                             blocks=[],
-                            status_formats=['Welcome to my {0} {1} follower @{2}, who i shall now block.'])
+                            status_formats=['Welcome to my {0} {1} follower @{2}, who i shall now block.',
+                                            'Salutations to @{2}, my {0} {1} follower - who i shall now block.',
+                                            'Congratulations, @{2}! You are my {0} {1} follower! And now you will be blocked. Better luck next time!'])
         
         with open(states_file, 'w') as file:
             json.dump(states, file)
@@ -80,8 +85,9 @@ if __name__ == '__main__':
         except Exception, e:
             print e
             print 'Error on init'
-            exit()
+            #exit()
         
+        #user_state = check_follows(tw, states[user], user)
         user_state = check_follows(tw, states[user], user)
 
         states[user] = user_state
