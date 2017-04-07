@@ -1,0 +1,15 @@
+# Add you account credentials here and rename file to 
+# twitter_config.py
+accounts = {
+    'spacedicks1488': {
+        'username': 'spacedicks1488',
+        'consumer_key': 'DxgffzKlmFV0FpIfWKqrLYuI9',
+        'consumer_secret': 'DQXbAvhctx7CMescFFt0Ehr42SwQaQ1Go1FnasgG4gdhNYPByn',
+        'access_token_key': '781887258328641536-nJyF4N7nWkwpQqKkwyrLYM0X2e2EEeI',
+        'access_token_secret': 'W10jN9bx0QcDXIzzYVZFl7TwBXCHsGgHWhsyTknCLBjZT',
+        'id': 781887258328641536,
+        'email': 'spacedicks1488@gmail.com',
+        'password': 'pooppooppoop'
+        },
+}
+
